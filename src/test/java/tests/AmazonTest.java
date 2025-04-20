@@ -5,8 +5,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
 import org.testng.annotations.*;
+import java.time.Duration;
 
 public class AmazonTest {
 
@@ -14,8 +17,7 @@ public class AmazonTest {
 
     @BeforeTest
     public void setUp() {
-        // WebDriverManager ile ChromeDriver'ı otomatik olarak yükle
-        WebDriverManager.chromedriver().setup();
+        System.setProperty("webdriver.chrome.driver", "C:/Program Files/JetBrains/webdrivers/chromedriver.exe");  // ChromeDriver'ın bulunduğu yeri belirtin
         driver = new ChromeDriver();
     }
 
@@ -39,6 +41,17 @@ public class AmazonTest {
 
         // Başlıkta 'laptop' kelimesinin olup olmadığını doğrula
         Assert.assertTrue(title.toLowerCase().contains("laptop"), "Sayfa başlığında 'laptop' kelimesi bulunamadı.");
+    }
+
+    @Test
+    public void debugSearchTest() throws InterruptedException {
+        driver.get("https://www.amazon.com.tr");
+
+        // Beklemek için doğru süreyi ayarlama
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5)); // 5 saniye bekle
+        wait.until(ExpectedConditions.titleContains("Amazon")); // Amazon başlığının yüklenmesini bekle
+
+        System.out.println("Page Title: " + driver.getTitle());
     }
 
     @AfterTest

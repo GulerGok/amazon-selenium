@@ -15,14 +15,14 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>4.9.0</version> <!-- Güncel Selenium sürümü -->
+            <version>4.10.0</version> <!-- Güncel Selenium sürümü -->
         </dependency>
 
         <!-- TestNG -->
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>7.4.0</version> <!-- En son TestNG sürümü -->
+            <version>7.7.1</version> <!-- En son TestNG sürümü -->
             <scope>test</scope>
         </dependency>
 
