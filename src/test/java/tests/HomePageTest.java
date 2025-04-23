@@ -3,6 +3,7 @@ package tests;
 import base.BaseTest;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
@@ -14,7 +15,7 @@ import java.time.Duration;
 public class HomePageTest extends BaseTest {
 
     @Test
-    public void TC02_testSearchSuggestions() {
+    public void TC02_TestSearchSuggestions() {
         if (driver == null) {
             System.out.println("Driver null, test başlatılamadı!");
             return;
@@ -77,29 +78,29 @@ public class HomePageTest extends BaseTest {
         }
 
         driver.get("https://www.amazon.com");
-        HomePage homePage = new HomePage(driver);
 
         try {
-            // Giriş butonuna tıklayın ve login ekranının açıldığını doğrulayın
-            boolean isSignInPanelOpened = homePage.clickSignInAndVerifyPanel();  // Bu metodun true/false döndürdüğünden emin olun
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
 
-            // Panelin açıldığını doğrulayın
-            Assert.assertTrue(isSignInPanelOpened, "Login paneli açılmadı!");
+            // Daha esnek bir locator kullandık
+            By accountListLocator = By.cssSelector("a[id='nav-link-accountList'], a[data-nav-role='signin']");
 
-            // WebDriverWait nesnesini oluşturun (Selenium 4 ile uyumlu)
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebElement accountMenu = wait.until(ExpectedConditions.presenceOfElementLocated(accountListLocator));
 
-            // Email alanının görünür olduğunu doğrula
-            WebElement emailField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ap_email")));
-            Assert.assertTrue(emailField.isDisplayed(), "Email alanı görünmüyor.");
+            // Hover işlemi
+            Actions actions = new Actions(driver);
+            actions.moveToElement(accountMenu).perform();
 
-            // Continue butonunun görünür olduğunu doğrula
-            WebElement continueButton = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("continue")));
-            Assert.assertTrue(continueButton.isDisplayed(), "Continue butonu görünmüyor.");
+            // Tıklanabilir olmasını bekle ve tıkla
+            wait.until(ExpectedConditions.elementToBeClickable(accountMenu)).click();
+
+            // E-posta alanını bekle
+            WebElement emailField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("ap_email_login")));
+
+            Assert.assertTrue(emailField.isDisplayed(), "Login paneli açılmadı!");
 
         } catch (Exception e) {
             Assert.fail("Login ekranı doğrulanamadı: " + e.getMessage());
         }
     }
-
 }

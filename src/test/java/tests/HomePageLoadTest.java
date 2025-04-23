@@ -8,7 +8,7 @@ import pages.HomePage;
 public class HomePageLoadTest extends BaseTest {
 
     @Test
-    public void TC01_verifyHomepageMainComponents() {
+    public void TC01_VerifyHomepageMainComponents() {
         // Eğer driver null ise, test hemen durur ve hata mesajı yazdırılır
         if (driver == null) {
             System.out.println("Driver null, test başlatılamadı!");
