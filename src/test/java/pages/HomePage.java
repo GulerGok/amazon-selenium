@@ -1,9 +1,6 @@
 package pages;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -12,22 +9,21 @@ import java.time.Duration;
 
 public class HomePage {
 
-    WebDriver driver;
+    private WebDriver driver;
+    private WebDriverWait wait;
 
     // Constructor
     public HomePage(WebDriver driver) {
         this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(30));
     }
 
-    // Locators
+    // Locator'lar
     private By logo = By.id("nav-logo-sprites");
     private By searchBox = By.id("twotabsearchtextbox");
-    private By promoBanner = By.id("desktop-banner"); // Bu ID değişebilir zamanla
+    private By promoBanner = By.id("desktop-banner"); // Bu ID zamanla değişebilir
     private By footer = By.id("navFooter");
-
-    private By captchaBox = By.id("captchacharacters");  // Captcha'nın görünürlüğü kontrol edilen element (ID'yi güncelleyin)
-
-    // Dil menüsü locater'ları
+    private By captchaBox = By.id("captchacharacters");  // Captcha alanı ID'si
     private By languageMenu = By.id("icp-nav-flyout");
 
     // Actions / Methods
@@ -174,50 +170,53 @@ public class HomePage {
         }
     }
 
-    //Lokasyon ayarı değiştirilince ürün içeriklerinin güncellendiğini doğrula
+    // Lokasyon değiştir ve içeriklerin güncellendiğini doğrula
     public boolean changeZipCode(String zipCode) {
         try {
             driver.get("https://www.amazon.com/?language=en_US");
+            wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-            wait.until(webDriver -> ((JavascriptExecutor) webDriver)
-                    .executeScript("return document.readyState").equals("complete"));
+            WebElement deliverToButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("nav-global-location-popover-link")));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", deliverToButton);
+            wait.until(ExpectedConditions.elementToBeClickable(deliverToButton)).click();
 
-            // Sayfayı biraz kaydır
-            ((JavascriptExecutor) driver).executeScript("window.scrollBy(0, 300)");
-
-            // "Deliver to" butonuna tıkla
-            WebElement deliverTo = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("nav-global-location-popover-link")));
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", deliverTo);
-            ((JavascriptExecutor) driver).executeScript("window.scrollBy(0, -100);");
-            wait.until(ExpectedConditions.elementToBeClickable(deliverTo)).click();
-
-            // Zip kodu gir
             WebElement postalCodeField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("GLUXZipUpdateInput")));
             postalCodeField.clear();
             postalCodeField.sendKeys(zipCode);
 
-            // Uygula butonuna tıkla
             WebElement applyButton = driver.findElement(By.cssSelector("#GLUXZipUpdate .a-button-input"));
             applyButton.click();
 
-            // Popup kaybolsun
             wait.until(ExpectedConditions.invisibilityOf(postalCodeField));
-
-            // Sayfayı yenile (Amazon bazen anında güncellemiyor)
             driver.navigate().refresh();
 
-            // Lokasyon bilgisi alanını bekle ve al
             WebElement locationTextElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("glow-ingress-line2")));
             String updatedLocationText = locationTextElement.getText();
             System.out.println("Güncellenmiş Lokasyon: '" + updatedLocationText + "'");
 
-            // Boşlukları silip karşılaştır
-            return updatedLocationText.toLowerCase().replaceAll("\\s+", "")
-                    .contains(zipCode.toLowerCase().replaceAll("\\s+", ""));
-
+            return updatedLocationText.toLowerCase().replaceAll("\\s+", "").contains(zipCode.toLowerCase().replaceAll("\\s+", ""));
         } catch (Exception e) {
-            System.out.println("Lokasyon değiştirilemedi: " + e.getMessage());
+            System.out.println("Lokasyon değiştirilirken hata oluştu: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Mobil görünümde hamburger menüsünün görünürlüğünü kontrol et
+    public boolean isHamburgerMenuVisible() {
+        try {
+            WebElement hamburgerMenu = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-hamburger-menu")));
+            return hamburgerMenu.isDisplayed();
+        } catch (TimeoutException e) {
+            return false;
+        }
+    }
+
+    // Başlık (header) öğesinin görünür olduğunu doğrula
+    public boolean isHeaderVisible() {
+        try {
+            WebElement header = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("navbar")));
+            return header.isDisplayed();
+        } catch (TimeoutException e) {
             return false;
         }
     }

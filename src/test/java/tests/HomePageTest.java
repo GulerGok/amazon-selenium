@@ -2,6 +2,8 @@ package tests;
 
 import base.BaseTest;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -122,4 +124,38 @@ public class HomePageTest extends BaseTest {
         }
     }
 
+    @Test
+    public void TC06_ResponsiveDesignTest() {
+        if (driver == null) {
+            Assert.fail("Driver null, test başlatılamaz!");
+        }
+
+        try {
+            // Sayfayı aç
+            driver.get("https://www.amazon.com");
+
+            // Mobil boyuta getir (örnek: iPhone 12 ekran boyutu)
+            Dimension mobileSize = new Dimension(390, 844);
+            driver.manage().window().setSize(mobileSize);
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+            // Sayfa yüklenmesini bekle
+            wait.until(webDriver -> ((JavascriptExecutor) webDriver)
+                    .executeScript("return document.readyState").equals("complete"));
+
+            // Hamburger menü simgesi kontrolü (Mobilde gözükmeli)
+            WebElement hamburgerMenu = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-hamburger-menu")));
+            Assert.assertTrue(hamburgerMenu.isDisplayed(), "Hamburger menü mobil görünümde görünmüyor!");
+
+            // Sayfa tasarımı bozulmamış mı kontrol (örnek olarak header bölümü)
+            WebElement header = driver.findElement(By.id("navbar"));
+            Assert.assertTrue(header.isDisplayed(), "Header bölümü bozulmuş olabilir!");
+
+            System.out.println("Mobil görünüm testi başarıyla tamamlandı.");
+
+        } catch (Exception e) {
+            Assert.fail("Mobil görünüm testinde hata oluştu: " + e.getMessage());
+        }
+    }
 }
