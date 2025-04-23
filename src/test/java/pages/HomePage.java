@@ -174,48 +174,51 @@ public class HomePage {
         }
     }
 
-//    //Lokasyon ayarı değiştirilince ürün içeriklerinin güncellendiğini doğrula
-//    public boolean changeZipCode(String zipCode) {
-//        try {
-//            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-//
-//            // "Deliver to" linkine tıkla
-//            WebElement deliverTo = wait.until(ExpectedConditions.elementToBeClickable(By.id("nav-global-location-popover-link")));
-//            deliverTo.click();
-//
-//            // Posta kodu alanına zip gir
-//            WebElement postalCodeField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("GLUXZipUpdateInput")));
-//            postalCodeField.clear();
-//            postalCodeField.sendKeys(zipCode);
-//
-//            // Apply butonuna tıkla
-//            WebElement applyButton = driver.findElement(By.cssSelector("#GLUXZipUpdate .a-button-input"));
-//            applyButton.click();
-//
-//            // Done butonu çıkarsa tıkla (bazı senaryolarda çıkmaz)
-//            try {
-//                WebElement doneButton = wait.until(ExpectedConditions.elementToBeClickable(By.name("glowDoneButton")));
-//                doneButton.click();
-//            } catch (Exception ignored) {
-//                System.out.println("Done butonu görünmedi, atlanıyor.");
-//            }
-//
-//            // Lokasyon bilgisini bekle
-//            WebElement locationLine2 = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("glow-ingress-line2")));
-//            String locationText = locationLine2.getText().toLowerCase();
-//
-//            // Alternatif olarak line1 + line2 birlikte kontrol edilebilir
-//            WebElement locationLine1 = driver.findElement(By.id("glow-ingress-line1"));
-//            String combinedLocation = (locationLine1.getText() + " " + locationLine2.getText()).toLowerCase();
-//
-//            System.out.println("Güncellenmiş Lokasyon: " + combinedLocation);
-//
-//            return combinedLocation.contains("new york") || combinedLocation.contains(zipCode);
-//
-//        } catch (Exception e) {
-//            System.out.println("Lokasyon değiştirilemedi: " + e.getMessage());
-//            return false;
-//        }
-//    }
+    //Lokasyon ayarı değiştirilince ürün içeriklerinin güncellendiğini doğrula
+    public boolean changeZipCode(String zipCode) {
+        try {
+            driver.get("https://www.amazon.com/?language=en_US");
 
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+            wait.until(webDriver -> ((JavascriptExecutor) webDriver)
+                    .executeScript("return document.readyState").equals("complete"));
+
+            // Sayfayı biraz kaydır
+            ((JavascriptExecutor) driver).executeScript("window.scrollBy(0, 300)");
+
+            // "Deliver to" butonuna tıkla
+            WebElement deliverTo = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("nav-global-location-popover-link")));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", deliverTo);
+            ((JavascriptExecutor) driver).executeScript("window.scrollBy(0, -100);");
+            wait.until(ExpectedConditions.elementToBeClickable(deliverTo)).click();
+
+            // Zip kodu gir
+            WebElement postalCodeField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("GLUXZipUpdateInput")));
+            postalCodeField.clear();
+            postalCodeField.sendKeys(zipCode);
+
+            // Uygula butonuna tıkla
+            WebElement applyButton = driver.findElement(By.cssSelector("#GLUXZipUpdate .a-button-input"));
+            applyButton.click();
+
+            // Popup kaybolsun
+            wait.until(ExpectedConditions.invisibilityOf(postalCodeField));
+
+            // Sayfayı yenile (Amazon bazen anında güncellemiyor)
+            driver.navigate().refresh();
+
+            // Lokasyon bilgisi alanını bekle ve al
+            WebElement locationTextElement = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("glow-ingress-line2")));
+            String updatedLocationText = locationTextElement.getText();
+            System.out.println("Güncellenmiş Lokasyon: '" + updatedLocationText + "'");
+
+            // Boşlukları silip karşılaştır
+            return updatedLocationText.toLowerCase().replaceAll("\\s+", "")
+                    .contains(zipCode.toLowerCase().replaceAll("\\s+", ""));
+
+        } catch (Exception e) {
+            System.out.println("Lokasyon değiştirilemedi: " + e.getMessage());
+            return false;
+        }
+    }
 }

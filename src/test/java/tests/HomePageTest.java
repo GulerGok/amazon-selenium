@@ -103,4 +103,23 @@ public class HomePageTest extends BaseTest {
             Assert.fail("Login ekranı doğrulanamadı: " + e.getMessage());
         }
     }
+
+    @Test
+    public void TC05_LocationUpdateChangesContent() {
+        if (driver == null) {
+            Assert.fail("Driver null, test başlatılamaz!");
+        }
+
+        driver.get("https://www.amazon.com");
+        HomePage homePage = new HomePage(driver);
+
+        try {
+            boolean isUpdated = homePage.changeZipCode("10001");
+            Assert.assertTrue(isUpdated, "Konum güncellenmemiş gibi görünüyor!");
+
+        } catch (Exception e) {
+            Assert.fail("Lokasyon değiştirme sırasında hata: " + e.getMessage());
+        }
+    }
+
 }
