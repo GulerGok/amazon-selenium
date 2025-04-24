@@ -224,4 +224,26 @@ public class HomePage {
         leftArrow.click();
     }
 
+    // İlk banner’a tıkla ve href bilgisini döndür
+    public String clickFirstBannerAndReturnHref() {
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+
+            // Banner'ı CSS selector ile bul
+            WebElement firstBanner = wait.until(ExpectedConditions.elementToBeClickable(
+                    By.cssSelector("#gw-desktop-herotator a.a-link-normal[href]")  // Banner'a tıklama için selector
+            ));
+
+            String href = firstBanner.getAttribute("href");
+
+            // JavaScript ile tıklama – bazı durumlarda normal click çalışmayabilir
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", firstBanner);
+
+            return href;
+        } catch (Exception e) {
+            System.out.println("Banner'a tıklanamadı: " + e.getMessage());
+            return null;
+        }
+    }
+
 }

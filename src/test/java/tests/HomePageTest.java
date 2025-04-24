@@ -166,7 +166,7 @@ public class HomePageTest extends BaseTest {
 
         try {
             // Tarayıcıyı maximize et
-            driver.manage().window().maximize();
+            //driver.manage().window().maximize();
 
             // Karusel yüklenene kadar bekle
             wait.until(ExpectedConditions.presenceOfElementLocated(By.id("gw-desktop-herotator")));
@@ -218,6 +218,28 @@ public class HomePageTest extends BaseTest {
         } finally {
             driver.quit();
         }
+    }
+
+    @Test
+    public void TC08_VerifyBannerRedirectsCorrectly() {
+        driver.get("https://www.amazon.com");
+        HomePage homePage = new HomePage(driver);
+
+        // İlk banner'a tıklamadan önce href bilgisini al
+        String expectedUrl = homePage.clickFirstBannerAndReturnHref();
+        Assert.assertNotNull(expectedUrl, "Banner href alınamadı!");
+
+        // Yeni sayfanın yüklenmesi için bekle
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        wait.until(ExpectedConditions.urlContains(expectedUrl.split("/")[2])); // URL'nin domain kısmını kontrol et
+
+        // Gerçekleşen URL'yi al ve doğrula
+        String currentUrl = driver.getCurrentUrl();
+        System.out.println("Beklenen URL: " + expectedUrl);
+        System.out.println("Gerçekleşen URL: " + currentUrl);
+
+        // Yönlendirilmenin doğru olup olmadığını kontrol et
+        Assert.assertTrue(currentUrl.contains(expectedUrl.split("/")[2]), "Kampanya sayfasına yönlendirme başarısız!");
     }
 
 }
