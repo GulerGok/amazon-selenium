@@ -1,10 +1,7 @@
 package tests;
 
 import base.BaseTest;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Dimension;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -13,6 +10,7 @@ import org.testng.annotations.Test;
 import pages.HomePage;
 
 import java.time.Duration;
+import java.util.List;
 
 public class HomePageTest extends BaseTest {
 
@@ -74,7 +72,7 @@ public class HomePageTest extends BaseTest {
     }
 
     @Test
-    public void TC04_signInPanelTest() {
+    public void TC04_SignInPanelTest() {
         if (driver == null) {
             Assert.fail("Driver null, test başlatılamaz!");
         }
@@ -158,4 +156,68 @@ public class HomePageTest extends BaseTest {
             Assert.fail("Mobil görünüm testinde hata oluştu: " + e.getMessage());
         }
     }
+
+    @Test
+    public void TC07_VerifyCarouselArrowsFunctionality() {
+        driver.get("https://www.amazon.com");
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(40));
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+
+        try {
+            // Tarayıcıyı maximize et
+            driver.manage().window().maximize();
+
+            // Karusel yüklenene kadar bekle
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.id("gw-desktop-herotator")));
+
+            // İlk görselin alt metni
+            WebElement firstImage = wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.cssSelector("#gw-desktop-herotator .a-carousel-card img[alt]")));
+            String altBefore = firstImage.getAttribute("alt");
+            System.out.println("İlk görselin alt metni (önce): " + altBefore);
+
+            // Sağ oka tıkla
+            WebElement rightArrow = wait.until(ExpectedConditions.elementToBeClickable(
+                    By.cssSelector(".a-carousel-goto-nextpage")));
+            js.executeScript("arguments[0].scrollIntoView(true);", rightArrow);
+            rightArrow.click();
+            System.out.println("Sağ ok simgesi tıklandı.");
+
+            // Yeni görselin yüklenmesini bekle
+            Thread.sleep(3000);
+            WebElement afterRightImage = wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.cssSelector("#gw-desktop-herotator .a-carousel-card img[alt]")));
+            String altAfterRight = afterRightImage.getAttribute("alt");
+            System.out.println("Görselin alt metni (sağ ok sonrası): " + altAfterRight);
+
+            // Sağ ok sonrası alt metin farklı olmalı
+            Assert.assertNotEquals(altBefore, altAfterRight, "Sağ oka tıklanmasına rağmen görsel değişmedi!");
+
+            // Sol oka tıkla
+            WebElement leftArrow = wait.until(ExpectedConditions.elementToBeClickable(
+                    By.cssSelector(".a-carousel-goto-prevpage")));
+            js.executeScript("arguments[0].scrollIntoView(true);", leftArrow);
+            leftArrow.click();
+            System.out.println("Sol ok simgesi tıklandı.");
+
+            // Tekrar eski görsel yükleniyor mu kontrol et
+            Thread.sleep(3000);
+            WebElement afterLeftImage = wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.cssSelector("#gw-desktop-herotator .a-carousel-card img[alt]")));
+            String altAfterLeft = afterLeftImage.getAttribute("alt");
+            System.out.println("Görselin alt metni (sol ok sonrası): " + altAfterLeft);
+
+            // Sol ok sonrası ilk görsel geri gelmiş olmalı
+            Assert.assertEquals(altBefore, altAfterLeft, "Sol oka tıklanmasına rağmen eski görsel geri gelmedi!");
+
+        } catch (TimeoutException e) {
+            Assert.fail("Karusel öğesi veya ok simgeleri yüklenemedi: " + e.getMessage());
+        } catch (Exception e) {
+            Assert.fail("Test sırasında hata oluştu: " + e.getMessage());
+        } finally {
+            driver.quit();
+        }
+    }
+
 }
