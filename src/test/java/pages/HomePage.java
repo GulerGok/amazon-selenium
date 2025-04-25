@@ -288,4 +288,68 @@ public class HomePage {
         }
     }
 
+    //Footer'daki linklerin yönlendirilmesini doğrulama
+    public boolean verifyFooterLinks(WebDriver driver, int maxLinksToTest) {
+        boolean allPassed = true; // En sonda dönülecek genel sonuç
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+
+            js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+            Thread.sleep(1000);
+
+            List<WebElement> footerLinks = wait.until(
+                    ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("#navFooter a[href]"))
+            );
+
+            System.out.println("🔍 Bulunan footer bağlantı sayısı: " + footerLinks.size());
+            if (footerLinks.isEmpty()) return false;
+
+            int testCount = Math.min(maxLinksToTest, footerLinks.size());
+
+            for (int i = 0; i < testCount; i++) {
+                try {
+                    WebElement link = footerLinks.get(i);
+                    String linkText = link.getText().trim();
+                    String href = link.getAttribute("href");
+
+                    System.out.println("\n👉 Test edilen link [" + (i + 1) + "]: " + linkText + " | URL: " + href);
+
+                    driver.navigate().to(href);
+                    wait.until(webDriver -> js.executeScript("return document.readyState").equals("complete"));
+
+                    String currentUrl = driver.getCurrentUrl();
+                    String pageTitle = driver.getTitle().toLowerCase();
+                    System.out.println("✅ Yönlendirilen URL: " + currentUrl);
+                    System.out.println("📄 Sayfa başlığı: " + pageTitle);
+
+                    if (pageTitle.contains("404") || pageTitle.contains("not found") || pageTitle.contains("error")) {
+                        System.out.println("❌ Hatalı sayfa yüklendi: " + pageTitle);
+                        allPassed = false;
+                    }
+
+                } catch (Exception innerEx) {
+                    System.out.println("⚠️ Link testinde hata oluştu: " + innerEx.getMessage());
+                    allPassed = false;
+                }
+
+                // Geri dön ve footer'ı tekrar bul
+                driver.navigate().back();
+                js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+                Thread.sleep(1000);
+
+                // DOM yeniden yüklendiğinden linkleri tekrar al
+                footerLinks = wait.until(
+                        ExpectedConditions.presenceOfAllElementsLocatedBy(By.cssSelector("#navFooter a[href]"))
+                );
+            }
+
+        } catch (Exception e) {
+            System.out.println("🚨 Footer link testi genel hata: " + e.getMessage());
+            return false;
+        }
+
+        return allPassed;
+    }
+
 }

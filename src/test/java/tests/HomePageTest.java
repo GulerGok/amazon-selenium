@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 import pages.HomePage;
 
 import java.time.Duration;
+import java.util.List;
 
 public class HomePageTest extends BaseTest {
 
@@ -272,7 +273,6 @@ public class HomePageTest extends BaseTest {
 
     @Test
     public void TC10_VerifyCategoriesInHamburgerMenu() {
-
         driver.get("https://www.amazon.com");
 
         // HomePage nesnesi oluşturma
@@ -286,6 +286,19 @@ public class HomePageTest extends BaseTest {
 
         // Sayfayı kapatma
         driver.quit();
+    }
+
+    @Test
+    public void TC11_VerifyFooterLinks() {
+        if (driver == null) {
+            Assert.fail("Driver null, test başlatılamaz!");
+        }
+
+        driver.get("https://www.amazon.com");
+        HomePage homePage = new HomePage(driver);
+
+        boolean result = homePage.verifyFooterLinks(driver, 1000); // ilk 5 linki test et
+        Assert.assertTrue(result, "Footer bağlantılarından biri hatalı yönlendirme yaptı!");
     }
 
 }
