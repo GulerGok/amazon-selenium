@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 import pages.HomePage;
 
 import java.time.Duration;
-import java.util.List;
 
 public class HomePageTest extends BaseTest {
 
@@ -240,6 +239,35 @@ public class HomePageTest extends BaseTest {
 
         // Yönlendirilmenin doğru olup olmadığını kontrol et
         Assert.assertTrue(currentUrl.contains(expectedUrl.split("/")[2]), "Kampanya sayfasına yönlendirme başarısız!");
+    }
+
+    @Test
+    public void TC09_VerifyBackToTopButtonFunctionality() {
+        // Sayfayı aç
+        driver.get("https://www.amazon.com");
+
+        // Sayfanın altına kaydır
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+
+        // Sayfa altına kaydırdıktan sonra Back to Top butonunun görünür hale gelmesini bekle
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebElement backToTopButton = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.id("navBackToTop")  // Bu, Amazon'daki "Back to Top" butonunun id'sidir
+        ));
+
+        // Back to Top butonunun görünüp görünmediğini kontrol et
+        Assert.assertTrue(backToTopButton.isDisplayed(), "Back to Top butonu görünür olmalı!");
+
+        // Back to Top butonuna tıklayalım
+        backToTopButton.click();
+
+        // Sayfa üst kısmına dönüp dönmediğini kontrol et
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("nav-logo-sprites")));  // Sayfanın üst kısmındaki logo göründü mü?
+
+        // Sayfa üst kısmındaki logo görünür olmalı, bu da sayfanın yukarı kaydığını gösterir
+        WebElement logo = driver.findElement(By.id("nav-logo-sprites"));
+        Assert.assertTrue(logo.isDisplayed(), "Sayfa üst kısmına dönülmedi.");
     }
 
 }

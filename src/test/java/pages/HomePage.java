@@ -29,6 +29,7 @@ public class HomePage {
     private By carouselItems = By.cssSelector("#gw-desktop-herotator .a-carousel-card");
     private By rightArrow = By.cssSelector("#gw-desktop-herotator .a-carousel-goto-nextpage");
     private By leftArrow = By.cssSelector("#gw-desktop-herotator .a-carousel-goto-prevpage");
+    private By backToTopButton = By.id("navBackToTop");  // Back to Top butonunun id'si
 
     // Actions / Methods
     public boolean isCaptchaPage() {
@@ -45,17 +46,6 @@ public class HomePage {
         try {
             WebElement element = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
             return element.isDisplayed();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    // Arama önerilerinin görünür olduğunu kontrol et
-    public boolean isSearchSuggestionVisible() {
-        try {
-            WebElement suggestion = wait.until(ExpectedConditions.visibilityOfElementLocated(
-                    By.cssSelector("#nav-flyout-searchAjax .s-suggestion")));
-            return suggestion.isDisplayed();
         } catch (Exception e) {
             return false;
         }
@@ -78,6 +68,7 @@ public class HomePage {
         return isElementVisible(footer);
     }
 
+    // Arama kutusuna metin girme
     public boolean enterSearchText(String searchQuery) {
         try {
             wait.until(ExpectedConditions.elementToBeClickable(searchBox));  // Arama kutusunun tıklanabilir olmasını bekle
@@ -246,4 +237,34 @@ public class HomePage {
         }
     }
 
+    // Sayfa altına kaydırma ve Back to Top butonuna tıklama
+    public void scrollToBottomAndClickBackToTop() {
+        try {
+            JavascriptExecutor js = (JavascriptExecutor) driver;
+            // Sayfanın altına kaydır
+            js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+
+            // Back to Top butonunun görünür hale gelmesini bekle
+            wait.until(ExpectedConditions.visibilityOfElementLocated(backToTopButton));
+
+            // Back to Top butonuna tıklayalım
+            WebElement backToTopBtn = driver.findElement(backToTopButton);
+            if (backToTopBtn.isDisplayed()) {
+                backToTopBtn.click();
+            }
+        } catch (Exception e) {
+            System.out.println("Back to Top butonuna tıklanamadı: " + e.getMessage());
+        }
+    }
+
+    // Sayfa üst kısmına dönüp dönmediğini doğrulama
+    public boolean isAtTop() {
+        try {
+            WebElement logoElement = wait.until(ExpectedConditions.visibilityOfElementLocated(logo));
+            return logoElement.isDisplayed();
+        } catch (Exception e) {
+            System.out.println("Sayfa üst kısmına dönülmedi: " + e.getMessage());
+            return false;
+        }
+    }
 }
