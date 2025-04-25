@@ -270,4 +270,22 @@ public class HomePageTest extends BaseTest {
         Assert.assertTrue(logo.isDisplayed(), "Sayfa üst kısmına dönülmedi.");
     }
 
+    @Test
+    public void TC10_VerifyCategoriesInHamburgerMenu() {
+
+        driver.get("https://www.amazon.com");
+
+        // HomePage nesnesi oluşturma
+        HomePage homePage = new HomePage(driver);
+
+        // Hamburger menüsüne tıklama
+        homePage.openHamburgerMenu();
+
+        // Kategorilerin açıldığını kontrol etme
+        Assert.assertTrue(homePage.areCategoriesVisible(), "Kategoriler görünür değil!");
+
+        // Sayfayı kapatma
+        driver.quit();
+    }
+
 }

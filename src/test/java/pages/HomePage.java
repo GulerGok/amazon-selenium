@@ -267,4 +267,25 @@ public class HomePage {
             return false;
         }
     }
+
+    // Hamburger menüsüne tıklama
+    public void openHamburgerMenu() {
+        WebElement hamburgerMenu = wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("nav-hamburger-menu")
+        ));
+        hamburgerMenu.click();
+    }
+
+    // Kategorilerin açıldığını kontrol etme
+    public boolean areCategoriesVisible() {
+        try {
+            WebElement categoriesList = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.id("hmenu-content")
+            ));
+            return categoriesList.isDisplayed();
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }
