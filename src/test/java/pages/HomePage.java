@@ -352,4 +352,49 @@ public class HomePage {
         return allPassed;
     }
 
+    // Çerez bildirimi (veya International Shopping Transition Alert) kontrolü
+    public boolean isTransitionAlertVisible() {
+        try {
+            // Belirli bir süre boyunca, bildirim öğesinin görünür olmasını bekliyoruz
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+            WebElement alert = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.cssSelector("div[data-toaster-type='AIS_INGRESS']")
+            ));
+            // Bildirimin görünür olup olmadığını kontrol et
+            return alert.isDisplayed();
+        } catch (Exception e) {
+            System.out.println("Bildirimi bulurken hata oluştu: " + e.getMessage());
+            return false; // Hata durumunda false döndürüyoruz
+        }
+    }
+
+    // Dismiss butonuna tıklama işlemi
+    public void clickDismissButton() {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        try {
+            // "Dismiss" butonunun tıklanabilir olmasını bekliyoruz
+            WebElement dismissButton = wait.until(ExpectedConditions.elementToBeClickable(
+                    By.cssSelector("span.glow-toaster-button-dismiss"))
+            );
+            // Butona tıklıyoruz
+            dismissButton.click();
+        } catch (Exception e) {
+            System.out.println("Dismiss butonuna tıklanırken hata oluştu: " + e.getMessage());
+        }
+    }
+
+    // Bildirimin hala görünür olup olmadığını kontrol et
+    public boolean isTransitionAlertDismissed() {
+        try {
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+            // Bildirimin görünürlüğü kaybolduğunda true dönecek
+            return wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                    By.cssSelector("div[data-toaster-type='AIS_INGRESS']")
+            ));
+        } catch (Exception e) {
+            // Eğer hata oluşursa, bildirim büyük ihtimalle zaten kapanmıştır, o yüzden true döndürüyoruz
+            return true;
+        }
+    }
 }

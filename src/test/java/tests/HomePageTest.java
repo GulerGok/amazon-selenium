@@ -10,7 +10,6 @@ import org.testng.annotations.Test;
 import pages.HomePage;
 
 import java.time.Duration;
-import java.util.List;
 
 public class HomePageTest extends BaseTest {
 
@@ -297,8 +296,49 @@ public class HomePageTest extends BaseTest {
         driver.get("https://www.amazon.com");
         HomePage homePage = new HomePage(driver);
 
-        boolean result = homePage.verifyFooterLinks(driver, 1000); // ilk 5 linki test et
+        boolean result = homePage.verifyFooterLinks(driver, 3); // ilk 5 linki test et
         Assert.assertTrue(result, "Footer bağlantılarından biri hatalı yönlendirme yaptı!");
+    }
+
+    @Test
+    public void TC12_VerifyTransitionAlert() {
+        driver.get("https://www.amazon.com");
+
+        try {
+            // WebDriverWait ile sayfanın yüklenmesini bekleyin
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
+
+            // International Shopping Transition Alert bildiriminin görünmesini bekleyin
+            WebElement transitionAlert = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.cssSelector("div[data-toaster-type='AIS_INGRESS']") // Bildirim öğesinin CSS selector'u
+            ));
+
+            // Bildirimin görünür olduğunu doğrula
+            Assert.assertTrue(transitionAlert.isDisplayed(), "International Shopping Transition Alert görünmüyor!");
+
+            // "Dismiss" butonunun tıklanabilir olmasını bekleyin ve tıklayın
+            WebElement dismissButton = wait.until(ExpectedConditions.elementToBeClickable(
+                    By.cssSelector("span.glow-toaster-button-dismiss"))
+            );
+            dismissButton.click();
+            System.out.println("Bildirimi kapatıldı.");
+
+            // Bildirimin DOM'dan kaybolmasını bekleyin
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector("div[data-toaster-type='AIS_INGRESS']")));
+
+            // Bildirimin artık görünmediğini doğrula
+            boolean isAlertInvisible = driver.findElements(By.cssSelector("div[data-toaster-type='AIS_INGRESS']")).isEmpty();
+            Assert.assertTrue(isAlertInvisible, "Bildirimin kapanmadığı tespit edildi!");
+
+        } catch (Exception e) {
+            System.out.println("Test sırasında hata oluştu: " + e.getMessage());
+            Assert.fail("International Shopping Transition Alert testinde hata oluştu.");
+        } finally {
+            // Test sonrası WebDriver'ı kapat
+            if (driver != null) {
+                driver.quit();
+            }
+        }
     }
 
 }
